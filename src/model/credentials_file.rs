@@ -3,7 +3,7 @@
 use super::SectionName;
 use super::{header::CredentialHeader, whitespace::Whitespace, Section};
 use crate::lexer::{to_owned_input, Parsable};
-use crate::{SettingPath, Value};
+use crate::{Setting, SettingPath, Value};
 use nom::Parser;
 use nom::{combinator::eof, multi::many0, sequence::tuple};
 use std::fmt::Display;
@@ -52,33 +52,14 @@ impl AwsCredentialsFile {
             .find(|profile| *profile.get_name() == profile_name)
     }
 
-    // TODO: replace SettingPath with a more generic path
-    /// Provided a [SettingPath] and a [Value], locates the desired [Setting] and changes its [Value].
-    /// If the setting doesn't exist, it will be created. If the [Section] that contains the [Setting]
-    /// doesn't exist, it will also be created.
-    pub fn set(&mut self, setting_path: SettingPath, value: Value) {
-        // If the section type is not a profile, we cannot set it in a credentials file
-        if let Some(section_name) = setting_path.section_path.section_name {
-            let profile = match self.get_profile_mut(section_name.clone()) {
-                Some(section) => section,
-                None => self.insert_profile(section_name),
-            };
-
-            profile.set(setting_path.setting_name, value);
-        } else {
-            // If the section name is None, we cannot set it in a credentials file
-            panic!("Cannot set a setting without a section name in a credentials file");
-        }
-    }
-
     /// Check if the given [Section] exists from a [SectionPath]
     pub(crate) fn contains_profile(&self, profile_name: &SectionName) -> bool {
         self.profiles.iter().any(|section| section.get_name() == profile_name)
     }
 
-    /// Given a [SectionPath], create the [Section] if it doesn't exist and return a mutable
+    /// Given a [SectionName], create the [Section] if it doesn't exist and return a mutable
     /// reference to it.
-    pub(crate) fn insert_profile(
+    pub fn insert_profile(
         &mut self,
         profile_name: SectionName,
     ) -> &mut Section<CredentialHeader> {

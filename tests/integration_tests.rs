@@ -280,11 +280,10 @@ aws_session_token=IQoJb3JpZ2luX2IQoJb3JpZ2luX2IQoJb3JpZ2luX2IQoJb3JpZ2luX2IQoJb3
         .parse::<AwsCredentialsFile>()
         .expect("Should be valid");
 
-    config.set(
-        SettingPath::try_from("profile.default.aws_access_key_id")
-            .expect("Should parse"),
-        Value::from("hi"),
-    );
+    let profile = config
+        .get_profile_mut("default".parse().expect("Should be valid"))
+        .expect("Should have found the default profile");
+    profile.set_value(&"aws_access_key_id".parse().expect("Should be valid"), ValueType::Single(Value::from("hi")));
 
     let stringified = config.to_string();
     assert_eq!(stringified, EXPECTED)
@@ -309,11 +308,9 @@ aws_access_key_id = hi"#;
         .parse::<AwsCredentialsFile>()
         .expect("Should be valid");
 
-    config.set(
-        SettingPath::try_from("profile.extra.aws_access_key_id")
-            .expect("Should parse"),
-        Value::from("hi"),
-    );
+    let profile = config
+        .insert_profile("extra".parse().expect("Should be valid"));
+    profile.set("aws_access_key_id".parse().expect("Should be valid"), Value::from("hi"));
 
     let stringified = config.to_string();
     assert_eq!(stringified, EXPECTED)
