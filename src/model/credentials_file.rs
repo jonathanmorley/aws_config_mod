@@ -3,7 +3,6 @@
 use super::SectionName;
 use super::{header::CredentialHeader, whitespace::Whitespace, Section};
 use crate::lexer::{to_owned_input, Parsable};
-use crate::{Setting, SettingPath, Value};
 use nom::Parser;
 use nom::{combinator::eof, multi::many0, sequence::tuple};
 use std::fmt::Display;
